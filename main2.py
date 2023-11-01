@@ -3,9 +3,14 @@ import os
 
 bd = BancoDeDados()
 
-senha = input("Acessar plataforma: ")
+while True:
+    os.system("cls")
+    senha = input("Acessar plataforma: ")
 
-bd.conectar(senha)
+    if not bd.conectar(senha):
+        continue
+    else:
+        break
 
 def cadastrarCliente():
     os.system("cls")
