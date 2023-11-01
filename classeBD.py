@@ -17,6 +17,8 @@ class BancoDeDados:
             pass
 
         self.atualizarAtributos()
+        self.atualizarClientes()
+        self.atualizarVendedores()
         
         return 1
     
@@ -39,8 +41,34 @@ class BancoDeDados:
         for produto in self.listaProdutos:
             self.armazenamento += produto[2]
 
+        self.produtoQtd = {}
+        for produto in self.listaProdutos:
+            self.produtoQtd[produto[0]] = produto[2]
+
+        self.produtoPreco = {}
+        for produto in self.listaProdutos:
+            self.produtoPreco[produto[0]] = produto[1]
+
+    def atualizarClientes(self):
+        comando = f'SELECT * FROM clientes'             
+        self.cursor.execute(comando)             
+        self.listaClientes = self.cursor.fetchall() 
+
+        self.listaCpfCliente = []
+        for cliente in self.listaClientes:
+            self.listaCpfCliente.append(cliente[2]) 
+
+    def atualizarVendedores(self):
+        comando = f'SELECT * FROM vendedores'             
+        self.cursor.execute(comando)             
+        self.listaVendedores = self.cursor.fetchall()
+
+        self.listaCpfVendedor = []
+        for vendedor in self.listaVendedores:
+            self.listaCpfVendedor.append(vendedor[2])
+
     def criarBanco(self):   
-        comando = f'CREATE DATABASE banco_projeto; USE banco_projeto; CREATE TABLE produtos(nome_produto varchar(50), valor int, quantidade int)' 
+        comando = f'CREATE DATABASE banco_projeto; USE banco_projeto; CREATE TABLE produtos(nome_produto varchar(50), valor int, quantidade int); CREATE TABLE vendas(id_venda int auto_increment, produto_vendido varchar(50), qtd int, valor_venda int, cpf_vendedor varchar(50), cpf_cliente varchar(50), mes int, ano int, primary key(id_venda)); CREATE TABLE vendedores(nome_vendedor varchar(50), sobrenome_vendedor varchar(50), cpf_vendedor varchar(11) primary key); CREATE TABLE clientes(nome_cliente varchar(50), sobrenome_cliente varchar(50), cpf_cliente varchar(11) PRIMARY KEY)' 
         self.cursor.execute(comando)
 
     def produtoExiste(self, nome):
@@ -102,6 +130,37 @@ class BancoDeDados:
         self.conexao.commit()
 
         self.atualizarAtributos()
+
+    def cadastrarCliente(self, nome, sobrenome, CPF):
+        comando = f'INSERT INTO clientes (nome_cliente, sobrenome_cliente, cpf_cliente) VALUES ("{nome}", "{sobrenome}", "{CPF}")'
+        self.cursor.execute(comando)
+        self.conexao.commit()
+
+        self.atualizarClientes()
+
+    def cadastrarVendedor(self, nome, sobrenome, CPF):
+        comando = f'INSERT INTO vendedores (nome_vendedor, sobrenome_vendedor, cpf_vendedor) VALUES ("{nome}", "{sobrenome}", "{CPF}")'
+        self.cursor.execute(comando)
+        self.conexao.commit()
+
+        self.atualizarVendedores()
+
+    def listar_menos_que_5(self):
+        comando = f'SELECT * FROM produtos WHERE quantidade < 5'
+        self.cursor.execute(comando)             
+        resultado = self.cursor.fetchall()
+
+        lista = ''
+        
+        for produto in resultado:
+            lista += f'Nome: {produto[0]}\nValor: R${produto[1]},00\nQuantidade: {produto[2]}\n\n'
+
+        return lista
+
+    def registrarVenda(self, produto, quantidade, cpfVendedor, cpfcliente, mes, ano):
+        comando = f'INSERT INTO vendas (produto_vendido, qtd, valor_venda, cpf_vendedor, cpf_cliente, mes, ano) VALUES ("{produto}", {quantidade}, {quantidade*self.produtoPreco[produto]}, "{cpfVendedor}", "{cpfcliente}", {mes}, {ano})'
+        self.cursor.execute(comando)
+        self.conexao.commit()
 
     def close(self):
         self.cursor.close()
