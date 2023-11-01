@@ -82,7 +82,11 @@ def listarProdutosMenosQue5():
     print(bd.listar_menos_que_5())
 
 def relatorioVendedores():
-    pass
+    os.system("cls")
+
+    print(bd.returnRelatorioVendas())
+
+    input()
 
 def historicoCliente():
     os.system("cls")
@@ -124,7 +128,7 @@ while True:
             listarProdutos()
             input()
         case '5':
-            pass
+            relatorioVendedores()
         case '6':
             historicoCliente()
         case '7':

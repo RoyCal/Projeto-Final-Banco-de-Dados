@@ -183,6 +183,30 @@ class BancoDeDados:
 
         return string
 
+    def returnRelatorioVendas(self):
+        relatorio = ''
+
+        for vendedor in self.listaVendedores:
+            cpfVendedor = vendedor[2]
+            nomeVendedor = f'{vendedor[0]} {vendedor[1]}'
+
+            relatorio += nomeVendedor
+
+            valorTotal = 0
+
+            comando = f'SELECT * FROM vendas WHERE cpf_vendedor = "{cpfVendedor}"'
+            self.cursor.execute(comando)
+
+            vendas = self.cursor.fetchall()
+
+            for compra in vendas:
+                relatorio += f'\nid da venda: {compra[0]}, Produto: {compra[1]}, Quantidade: {compra[2]}, Valor: {compra[3]}, Data: {compra[6]}/{compra[7]}'
+                valorTotal += compra[3]
+
+            relatorio += f"\nValor total vendido: {valorTotal}\n\n"
+
+        return relatorio
+
     def close(self):
         self.cursor.close()
         self.conexao.close()
