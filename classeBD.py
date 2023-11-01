@@ -162,6 +162,27 @@ class BancoDeDados:
         self.cursor.execute(comando)
         self.conexao.commit()
 
+    def returnCliente(self, cpf):
+        comando = f'SELECT * FROM clientes WHERE cpf_cliente = "{cpf}"'
+        self.cursor.execute(comando)
+        
+        cliente = self.cursor.fetchall()
+
+        return f'Nome: {cliente[0][0]} {cliente[0][1]}, CPF: {cliente[0][2]}'
+
+    def returnHistoricoCliente(self, cpf):
+        comando = f'SELECT * FROM vendas WHERE cpf_cliente = "{cpf}"'
+        self.cursor.execute(comando)
+
+        historico = self.cursor.fetchall()
+
+        string = ''
+
+        for compra in historico:
+            string += f'\nid da venda: {compra[0]}, Produto: {compra[1]}, Quantidade: {compra[2]}, Valor: {compra[3]}, Data: {compra[6]}/{compra[7]}'
+
+        return string
+
     def close(self):
         self.cursor.close()
         self.conexao.close()

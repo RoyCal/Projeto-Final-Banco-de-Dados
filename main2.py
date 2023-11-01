@@ -85,10 +85,22 @@ def relatorioVendedores():
     pass
 
 def historicoCliente():
-    pass
+    os.system("cls")
+
+    cpfCliente = input("Qual o cpf do cliente: ")
+
+    print(bd.returnHistoricoCliente(cpfCliente))
+
+    input()
 
 def cadastroCliente():
-    pass
+    os.system("cls")
+
+    cpfCliente = input("Qual o cpf do cliente: ")
+
+    print(bd.returnCliente(cpfCliente))
+
+    input()
 
 def printMenu():
     menu = '''(1) - Cadastrar cliente\n(2) - Cadastrar vendedor\n(3) - Vender\n(4) - Listar produtos\n(5) - Relatorio dos vendedores\n(6) - Historico de compras do cliente\n(7) - Cadastro do cliente\n(8) - Fechar\n'''
@@ -99,25 +111,27 @@ def printMenu():
 while True:
     printMenu()
 
-    choice = int(input())
+    choice = input()
 
     match(choice):
-        case 1:
+        case '1':
             cadastrarCliente()
-        case 2:
+        case '2':
             cadastrarVendedor()
-        case 3:
+        case '3':
             vender()
-        case 4:
+        case '4':
             listarProdutos()
             input()
-        case 5:
+        case '5':
             pass
-        case 6:
-            pass
-        case 7:
-            pass
-        case 8:
+        case '6':
+            historicoCliente()
+        case '7':
+            cadastroCliente()
+        case '8':
             break
+        case _:
+            continue
 
 bd.close()
