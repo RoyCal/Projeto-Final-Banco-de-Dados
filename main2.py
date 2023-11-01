@@ -79,6 +79,7 @@ def vender():
 
 def listarProdutos():
     print(bd.listar_todos())
+    input()
 
 def listarProdutosFiltro():
     pass
@@ -131,7 +132,6 @@ while True:
             vender()
         case '4':
             listarProdutos()
-            input()
         case '5':
             relatorioVendedores()
         case '6':
