@@ -98,16 +98,26 @@ class BancoDeDados:
 
         return lista
 
-    def alterarValor(self, nome, novoValor): #UPDATE
+    def alterarValor(self, nome, novoValor):#alterei
         if not self.produtoExiste(nome):
             print("Produto inexistente")
             return
 
-        comando = f'UPDATE produtos SET valor = {novoValor} WHERE nome_produto = "{nome}"'                   
+        comando = f'UPDATE produtos SET valor = {novoValor} WHERE nome_produto = "{nome}"'
         self.cursor.execute(comando)
         self.conexao.commit()
 
-        self.atualizarAtributos()
+        # Agora, consulte o valor atualizado do produto
+        comando = f'SELECT * FROM produtos WHERE nome_produto = "{nome}"'
+        self.cursor.execute(comando)
+        resultado = self.cursor.fetchone()
+
+        if resultado:
+            nome_produto, valor, quantidade = resultado
+            self.atualizarAtributos()
+            return f'Produto atualizado:\nNome: {nome_produto}\nValor: R${valor},00\nQuantidade: {quantidade}'
+        else:
+            return 'Falha na atualização'
 
     def alterarQuantidade(self, nome, inc):
         if not self.produtoExiste(nome):
@@ -206,6 +216,76 @@ class BancoDeDados:
             relatorio += f"\nValor total vendido: {valorTotal}\n\n"
 
         return relatorio
+
+    
+#------------------------------------------------ alterei a partir daqui ------------------------------------------------ 
+    def criar_tabela_descontos(self):
+            comando = "CREATE TABLE Descontos (fanOnePiece INT DEFAULT 0, torceFlamengo INT DEFAULT 0, ehDeSouza INT DEFAULT 0)"
+            self.cursor.execute(comando)
+            self.conexao.commit()
+
+    def cadastrar_cliente_desconto(self, cpf, atributo):
+        # Verificar se o CPF já existe na tabela
+        comando = f"SELECT * FROM Descontos WHERE {atributo} = 1 AND cpf = '{cpf}'"
+        self.cursor.execute(comando)
+        resultado = self.cursor.fetchall()
+
+        if resultado:
+            print(f"O CPF {cpf} já possui desconto em '{atributo}'.")
+            return
+
+        # Inserir o CPF na tabela com o atributo correspondente
+        comando = f"UPDATE Descontos SET {atributo} = 1 WHERE cpf = '{cpf}'"
+        self.cursor.execute(comando)
+        self.conexao.commit()
+  
+    def disponibilidade_estoque(self):
+        # Cria a stored procedure para processar compras
+        comando = '''
+        DELIMITER //
+        CREATE PROCEDURE ProcessarCompra(IN produtoNome VARCHAR(50), IN qtdDesejada INT, IN cpfVendedor VARCHAR(11), IN cpfCliente VARCHAR(11), IN mes INT, IN ano INT)
+        BEGIN
+            DECLARE estoqueAtual INT;
+            DECLARE precoProduto INT;
+            DECLARE valorVenda INT;
+
+            -- Verifica se o produto existe e obtém o estoque e preço
+            SELECT quantidade, valor INTO estoqueAtual, precoProduto
+            FROM produtos
+            WHERE nome_produto = produtoNome;
+
+            -- Verifica se há estoque suficiente
+            IF estoqueAtual >= qtdDesejada THEN
+                -- Calcula o valor da venda
+                SET valorVenda = qtdDesejada * precoProduto;
+
+                -- Registra a venda
+                INSERT INTO vendas (produto_vendido, qtd, valor_venda, cpf_vendedor, cpf_cliente, mes, ano)
+                VALUES (produtoNome, qtdDesejada, valorVenda, cpfVendedor, cpfCliente, mes, ano);
+
+                -- Atualiza o estoque
+                UPDATE produtos
+                SET quantidade = quantidade - qtdDesejada
+                WHERE nome_produto = produtoNome;
+
+                -- A transação foi bem-sucedida
+                SELECT 'Compra efetivada com sucesso.' AS Resultado;
+            ELSE
+                -- Não há estoque suficiente
+                SELECT 'Estoque insuficiente para a compra.' AS Resultado;
+            END IF;
+        END //
+        DELIMITER ;
+        '''
+        self.cursor.execute(comando)
+        self.conexao.commit()
+        resultado = self.cursor.fetchone()
+
+        # Retorna o resultado da compra
+        if resultado:
+            return 1
+        else:
+            return 'Falha ao processar a compra.'
 
     def close(self):
         self.cursor.close()

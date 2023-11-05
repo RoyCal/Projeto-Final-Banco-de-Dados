@@ -68,11 +68,13 @@ def vender():
                 break
             else:
                 continue
-
+        #alterei aqui
         for produto in carrinho:
-            bd.alterarQuantidade(produto, -carrinho[produto])
-            bd.registrarVenda(produto, carrinho[produto], cpfVendedor, cpfCliente, 11, 2023)
-
+            if(bd.disponibilidade_estoque() == 1):
+                bd.alterarQuantidade(produto, -carrinho[produto])
+                bd.registrarVenda(produto, carrinho[produto], cpfVendedor, cpfCliente, 11, 2023)
+            else:
+                print("Desculpe nao temos o produto no estoque!!")
         bd.atualizarAtributos
 
         break
@@ -91,6 +93,15 @@ def relatorioVendedores():
     os.system("cls")
 
     print(bd.returnRelatorioVendas())
+
+    input()
+
+def atualizarValor():
+    os.system("cls")
+
+    nome_produto = input("Qual o nome do produto a ser atualizado ? ")
+    novo_valor = input("Qual o novo preco de venda ? ")
+    bd.alterarValor(nome_produto,novo_valor)
 
     input()
 
@@ -113,7 +124,7 @@ def cadastroCliente():
     input()
 
 def printMenu():
-    menu = '''(1) - Cadastrar cliente\n(2) - Cadastrar vendedor\n(3) - Vender\n(4) - Listar produtos\n(5) - Relatorio dos vendedores\n(6) - Historico de compras do cliente\n(7) - Cadastro do cliente\n(8) - Fechar\n'''
+    menu = '''(1) - Cadastrar cliente\n(2) - Cadastrar vendedor\n(3) - Vender\n(4) - Listar produtos\n(5) - Relatorio dos vendedores\n(6) - Historico de compras do cliente\n(7) - Cadastro do cliente\n(8) - atualizar preco de um produto\n(9) - Fechar\n'''
     
     os.system("cls")
     print(menu)
@@ -139,6 +150,8 @@ while True:
         case '7':
             cadastroCliente()
         case '8':
+            atualizarValor()
+        case '9':
             break
         case _:
             continue
